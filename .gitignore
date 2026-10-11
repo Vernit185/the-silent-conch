@@ -10,11 +10,9 @@ __pycache__/
 env/
 ENV/
 
-# Frontend dependencies & builds (source code in eleventh-seal-console is tracked)
-eleventh-seal-console/node_modules/
-eleventh-seal-console/.output/
-eleventh-seal-console/.tanstack/
-eleventh-seal-console/.wrangler/
+# Frontend dependencies & builds
+frontend/node_modules/
+frontend/dist/
 
 # OS / Editor
 .DS_Store

@@ -37,9 +37,9 @@ docker-compose up --build
 ```
 
 ### 4. Interactive Frontend Console (Optional)
-The companion interactive UI console is available at `Vernit185/eleventh-seal-console`:
+The companion interactive UI console is built with Vite, React, and Tailwind CSS:
 ```bash
-cd eleventh-seal-console
+cd frontend
 npm install
 npm run dev
 ```

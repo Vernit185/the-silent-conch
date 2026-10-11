@@ -14,3 +14,5 @@ services:
         value: KCTF{5h4nkh4_51l3n7_3l3v3n7h_534l_3cd54_n0nc3_unl0ck3d_48f9}
       - key: PORT
         value: 10000
+      - key: PYTHONUNBUFFERED
+        value: "1"
