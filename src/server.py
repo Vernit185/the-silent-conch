@@ -9,8 +9,12 @@ Exposes:
 
 import os
 import sys
-import httpx
 from typing import Optional, List
+try:
+    import httpx
+except ImportError:
+    httpx = None
+
 from fastapi import FastAPI, Request, Header, HTTPException, Query, Response, Depends
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -80,27 +84,30 @@ async def forward_to_frontend(request: Request, path: str = ""):
     if request.url.query:
         target += f"?{request.url.query}"
 
-    try:
-        async with httpx.AsyncClient() as client:
-            headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length"]}
-            content = await request.body()
-            resp = await client.request(
-                method=request.method,
-                url=target,
-                headers=headers,
-                content=content,
-                timeout=5.0
-            )
-            excluded = ["content-encoding", "content-length", "transfer-encoding", "connection"]
-            resp_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
-            return Response(content=resp.content, status_code=resp.status_code, headers=resp_headers)
-    except Exception:
-        for t_name in ["new_console.html", "index.html"]:
-            template_path = os.path.join(os.path.dirname(__file__), "templates", t_name)
-            if os.path.exists(template_path):
-                with open(template_path, "r", encoding="utf-8") as f:
-                    return HTMLResponse(content=f.read())
-        return HTMLResponse("<h1>Kurukshetra Relay Command - Seal XI</h1>")
+    if httpx is not None:
+        try:
+            async with httpx.AsyncClient() as client:
+                headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length"]}
+                content = await request.body()
+                resp = await client.request(
+                    method=request.method,
+                    url=target,
+                    headers=headers,
+                    content=content,
+                    timeout=5.0
+                )
+                excluded = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+                resp_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
+                return Response(content=resp.content, status_code=resp.status_code, headers=resp_headers)
+        except Exception:
+            pass
+
+    for t_name in ["new_console.html", "index.html"]:
+        template_path = os.path.join(os.path.dirname(__file__), "templates", t_name)
+        if os.path.exists(template_path):
+            with open(template_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+    return HTMLResponse("<h1>Kurukshetra Relay Command - Seal XI</h1>")
 
 @app.get("/")
 @app.get("/diagnostics")
