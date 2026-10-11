@@ -152,7 +152,7 @@ def create_oracle_jwt(
         "sub": "officer-relayer-11",
         "scope": scope,
         "case_id": case_id,
-        "iat": now,
+        "iat": now - 60,
         "exp": now + expires_in
     }
     headers = {
@@ -181,7 +181,8 @@ def validate_oracle_jwt(token_str: str) -> Tuple[bool, str, Optional[Dict[str, A
             target_pub,
             algorithms=[JWT_ALGORITHM],
             issuer=JWT_ISSUER,
-            audience=JWT_AUDIENCE
+            audience=JWT_AUDIENCE,
+            leeway=120
         )
 
         scopes = set(payload.get("scope", "").split())
