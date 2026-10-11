@@ -75,53 +75,36 @@ class TicketRedeemRequest(BaseModel):
 # -------------------------------------------------------------
 # 1. Web Portal & Diagnostic Endpoints
 # -------------------------------------------------------------
-FRONTEND_DEV_URL = "http://127.0.0.1:8080"
+# Pre-cache template in memory for sub-millisecond response times
+TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+_INDEX_HTML_CACHED = ""
+if os.path.exists(TEMPLATE_PATH):
+    try:
+        with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
+            _INDEX_HTML_CACHED = f.read()
+    except Exception:
+        pass
 
-async def forward_to_frontend(request: Request, path: str = ""):
-    # In production (e.g. Render) or when dev server is absent, serve the integrated Eleventh Seal Console template
-    if os.environ.get("RENDER") or os.environ.get("PRODUCTION") == "1":
-        template_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
-        if os.path.exists(template_path):
-            with open(template_path, "r", encoding="utf-8") as f:
-                return HTMLResponse(content=f.read())
-
-    target = f"{FRONTEND_DEV_URL}/{path}".rstrip("/")
-    if not path:
-        target = f"{FRONTEND_DEV_URL}/"
-    if request.url.query:
-        target += f"?{request.url.query}"
-
-    if httpx is not None:
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length"]}
-                content = await request.body()
-                resp = await client.request(
-                    method=request.method,
-                    url=target,
-                    headers=headers,
-                    content=content,
-                    timeout=0.8
-                )
-                excluded = ["content-encoding", "content-length", "transfer-encoding", "connection"]
-                resp_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
-                return Response(content=resp.content, status_code=resp.status_code, headers=resp_headers)
-        except Exception:
-            pass
-
-    template_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
-    if os.path.exists(template_path):
-        with open(template_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    return HTMLResponse("<h1>Kurukshetra Relay Command - Seal XI</h1>")
+def get_portal_html() -> HTMLResponse:
+    global _INDEX_HTML_CACHED
+    if not _INDEX_HTML_CACHED and os.path.exists(TEMPLATE_PATH):
+        with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
+            _INDEX_HTML_CACHED = f.read()
+    return HTMLResponse(content=_INDEX_HTML_CACHED or "<h1>Kurukshetra Relay Command - Seal XI</h1>")
 
 @app.get("/")
 @app.get("/diagnostics")
 @app.get("/oracle")
 @app.get("/archive")
-async def portal_index(request: Request):
-    path = request.url.path.lstrip("/")
-    return await forward_to_frontend(request, path)
+async def portal_index():
+    return get_portal_html()
+
+@app.get("/favicon.ico")
+async def favicon():
+    fav_path = os.path.join(os.path.dirname(__file__), "static", "favicon.ico")
+    if os.path.exists(fav_path):
+        return FileResponse(fav_path)
+    return Response(status_code=204)
 
 @app.get("/api/diagnostics/list")
 @app.get("/api/diagnostics/records")
@@ -374,9 +357,12 @@ async def reset_challenge():
 async def health():
     return {"status": "ok", "challenge": "The Silent Conch: The Eleventh Seal"}
 
-# Catch-all for frontend assets (e.g. /@id, /@fs, /src, /assets, /node_modules)
+# Catch-all for frontend deep links and static fallback
 @app.api_route("/{path:path}", methods=["GET", "POST", "HEAD"])
 async def frontend_asset_catch_all(request: Request, path: str):
     if path.startswith("api/"):
         return JSONResponse(status_code=404, content={"status": "error", "message": f"API endpoint '/{path}' not found."})
-    return await forward_to_frontend(request, path)
+    static_file = os.path.join(STATIC_DIR, path)
+    if os.path.exists(static_file) and os.path.isfile(static_file):
+        return FileResponse(static_file)
+    return get_portal_html()
