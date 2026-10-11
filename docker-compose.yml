@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  silent-conch:
+    build: .
+    container_name: silent-conch-challenge
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - CHALLENGE_FLAG=KCTF{5h4nkh4_51l3n7_3l3v3n7h_534l_3cd54_n0nc3_unl0ck3d_48f9}
+    restart: unless-stopped

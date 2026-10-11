@@ -1,0 +1,13 @@
+THE SILENT CONCH: THE ELEVENTH SEAL
+CTF CHALLENGE CONNECTION GUIDE
+
+Portal Web Interface:
+http://<HOST>:<PORT>/
+
+REST Endpoints:
+- Manifest Listing:    GET  /api/diagnostics/list
+- Manifest View:       GET  /api/diagnostics/view?ref=<id>
+- Artifact Download:   GET  /api/diagnostics/download?ref=<id>
+- Oracle Spec:         GET  /api/oracle/auth-spec
+- Oracle Inquiry:      POST /api/oracle/query
+- Archive Redemption:  POST /api/archive/redeem

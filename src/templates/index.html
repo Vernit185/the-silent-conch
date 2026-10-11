@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Silent Conch: The Eleventh Seal | Kurukshetra Relay Gateway</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=JetBrains+Mono:wght@300;400;600&family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    <div class="conch-sigil-bg"></div>
+
+    <header class="gateway-header">
+        <div class="header-branding">
+            <div class="conch-icon">🐚</div>
+            <div>
+                <h1 class="portal-title">THE SILENT CONCH</h1>
+                <p class="portal-subtitle">KURUKSHETRA RELAY COMMAND & INTELLIGENCE GATEWAY // SEAL XI</p>
+            </div>
+        </div>
+        <div class="gateway-status-badge">
+            <span class="status-dot"></span>
+            <span class="status-text">RELAY STATION 11: NIGHT WATCH ACTIVE</span>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Section 1: Overview & Narrative -->
+        <section class="card narrative-card">
+            <div class="card-header">
+                <h2>INCIDENT INTELLIGENCE DISPATCH</h2>
+                <span class="badge badge-warning">CLASSIFIED INCIDENT</span>
+            </div>
+            <div class="card-body">
+                <p class="narrative-quote">
+                    "The Eleventh Seal was opened during the night watch, but no commander admits issuing the order. 
+                    The relay's signature records appear authentic, and the Oracle denies any breach of protocol. 
+                    Investigate the available records, reconstruct the sequence of events, and determine how the sealed archive was released."
+                </p>
+                <div class="meta-row">
+                    <div class="meta-item"><span class="meta-label">Incident Case:</span> <code class="accent-code" id="target-case-badge">CASE-KURUKSHETRA-SEAL11</code></div>
+                    <div class="meta-item"><span class="meta-label">Protocol:</span> <code>KRP/1.1 (Framed TCP)</code></div>
+                    <div class="meta-item"><span class="meta-label">Archive Target:</span> <code>ARCHIVE-SEAL-11</code></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Diagnostic Artifacts & Download Gateway -->
+        <section class="card diagnostics-card">
+            <div class="card-header">
+                <h2>DIAGNOSTIC MANIFESTS & TELEMETRY ARTIFACTS</h2>
+                <button class="btn btn-sm btn-ghost" id="refresh-manifests-btn">Refresh List</button>
+            </div>
+            <div class="card-body">
+                <p class="section-help">Inspect perimeter diagnostic manifests. Core storage enforcement regulates access to binary packet captures.</p>
+                <div class="table-responsive">
+                    <table class="manifest-table" id="manifests-table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Title</th>
+                                <th>Access Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manifests-tbody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="artifact-test-box">
+                    <h4>Direct Artifact Retrieval Console</h4>
+                    <div class="input-action-row">
+                        <input type="text" id="download-ref-input" class="text-input" placeholder="e.g. diagnostic-pub-01 or seal11-relay-telemetry.pcap" value="diagnostic-pub-01">
+                        <button class="btn btn-primary" id="trigger-download-btn">Request Artifact</button>
+                    </div>
+                    <div id="download-status-feedback" class="status-feedback"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Oracle Intelligence Assistant -->
+        <section class="card oracle-card">
+            <div class="card-header">
+                <h2>KURUKSHETRA ORACLE ASSISTANT</h2>
+                <span class="badge badge-cyan">ES256 RESTRICTED</span>
+            </div>
+            <div class="card-body">
+                <p class="section-help">Authenticated AI assistant with internal RAG retrieval and wartime archival authority delegation.</p>
+                
+                <div class="form-group">
+                    <label for="oracle-jwt-token" class="input-label">Officer Authorization Token (ES256 Bearer JWT):</label>
+                    <textarea id="oracle-jwt-token" class="text-area-mono" rows="2" placeholder="eyJhbGciOiJFUzI1NiIsImtpZCI6InJlbGF5LXNlYWwtZWxldmVuIiwidHlwIjoiSldUIn0..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="oracle-query-input" class="input-label">Inquiry Prompt for the Oracle:</label>
+                    <div class="input-action-row">
+                        <input type="text" id="oracle-query-input" class="text-input" placeholder="Inquire about incident records or reconciliation status..." value="Review incident logs and reconciliation status for CASE-KURUKSHETRA-SEAL11">
+                        <button class="btn btn-accent" id="send-oracle-query-btn">Transmit Query</button>
+                    </div>
+                </div>
+
+                <div class="oracle-terminal" id="oracle-terminal-output">
+                    <div class="terminal-placeholder">Awaiting officer authentication and query submission...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Archive Vault Redemption -->
+        <section class="card vault-card">
+            <div class="card-header">
+                <h2>THE ELEVENTH SEAL ARCHIVE VAULT</h2>
+                <span class="badge badge-gold">SINGLE-USE REDEMPTION</span>
+            </div>
+            <div class="card-body">
+                <p class="section-help">Redeem a validated single-use ticket issued by the Oracle's archival preparation tool to unseal the archive.</p>
+
+                <div class="vault-inputs-grid">
+                    <div class="form-group">
+                        <label for="vault-ticket-input" class="input-label">Archive Ticket ID:</label>
+                        <input type="text" id="vault-ticket-input" class="text-input" placeholder="TICKET-SEAL11-..." autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="vault-case-input" class="input-label">Case ID:</label>
+                        <input type="text" id="vault-case-input" class="text-input" value="CASE-KURUKSHETRA-SEAL11">
+                    </div>
+                </div>
+
+                <button class="btn btn-gold btn-block" id="redeem-vault-ticket-btn">BREAK THE ELEVENTH SEAL</button>
+
+                <div id="vault-redemption-result" class="vault-result-area"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for viewing manifests -->
+    <div class="modal-backdrop" id="manifest-modal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Diagnostic Manifest</h3>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body-content"></div>
+        </div>
+    </div>
+
+    <footer class="gateway-footer">
+        <p>THE SILENT CONCH: THE ELEVENTH SEAL &copy; KURUKSHETRA RELAY COMMAND &bull; CTF COMPETITION RUNTIME</p>
+    </footer>
+
+    <script src="/static/js/portal.js"></script>
+</body>
+</html>

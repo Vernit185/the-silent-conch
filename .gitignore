@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.log
+
+# Environments
+.venv/
+env/
+ENV/
+
+# Separate frontend repository (hosted at Vernit185/eleventh-seal-console)
+eleventh-seal-console/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
