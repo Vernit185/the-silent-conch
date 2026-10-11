@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: the-silent-conch
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt && python scripts/generate_pcap.py
+    startCommand: python start_server.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: CHALLENGE_FLAG
+        value: KCTF{5h4nkh4_51l3n7_3l3v3n7h_534l_3cd54_n0nc3_unl0ck3d_48f9}
+      - key: PORT
+        value: 10000
