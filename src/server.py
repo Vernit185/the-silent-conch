@@ -9,6 +9,7 @@ Exposes:
 
 import os
 import sys
+import httpx
 from typing import Optional, List
 from fastapi import FastAPI, Request, Header, HTTPException, Query, Response, Depends
 from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
@@ -70,13 +71,44 @@ class TicketRedeemRequest(BaseModel):
 # -------------------------------------------------------------
 # 1. Web Portal & Diagnostic Endpoints
 # -------------------------------------------------------------
-@app.get("/", response_class=HTMLResponse)
-async def portal_index():
-    template_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
-    if os.path.exists(template_path):
-        with open(template_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    return HTMLResponse("<h1>Kurukshetra Relay Command - Seal XI</h1>")
+FRONTEND_DEV_URL = "http://127.0.0.1:8080"
+
+async def forward_to_frontend(request: Request, path: str = ""):
+    target = f"{FRONTEND_DEV_URL}/{path}".rstrip("/")
+    if not path:
+        target = f"{FRONTEND_DEV_URL}/"
+    if request.url.query:
+        target += f"?{request.url.query}"
+
+    try:
+        async with httpx.AsyncClient() as client:
+            headers = {k: v for k, v in request.headers.items() if k.lower() not in ["host", "content-length"]}
+            content = await request.body()
+            resp = await client.request(
+                method=request.method,
+                url=target,
+                headers=headers,
+                content=content,
+                timeout=5.0
+            )
+            excluded = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+            resp_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
+            return Response(content=resp.content, status_code=resp.status_code, headers=resp_headers)
+    except Exception:
+        for t_name in ["new_console.html", "index.html"]:
+            template_path = os.path.join(os.path.dirname(__file__), "templates", t_name)
+            if os.path.exists(template_path):
+                with open(template_path, "r", encoding="utf-8") as f:
+                    return HTMLResponse(content=f.read())
+        return HTMLResponse("<h1>Kurukshetra Relay Command - Seal XI</h1>")
+
+@app.get("/")
+@app.get("/diagnostics")
+@app.get("/oracle")
+@app.get("/archive")
+async def portal_index(request: Request):
+    path = request.url.path.lstrip("/")
+    return await forward_to_frontend(request, path)
 
 @app.get("/api/diagnostics/list")
 @app.get("/api/diagnostics/records")
@@ -328,3 +360,10 @@ async def reset_challenge():
 @app.get("/api/health")
 async def health():
     return {"status": "ok", "challenge": "The Silent Conch: The Eleventh Seal"}
+
+# Catch-all for frontend assets (e.g. /@id, /@fs, /src, /assets, /node_modules)
+@app.api_route("/{path:path}", methods=["GET", "POST", "HEAD"])
+async def frontend_asset_catch_all(request: Request, path: str):
+    if path.startswith("api/"):
+        return JSONResponse(status_code=404, content={"status": "error", "message": f"API endpoint '/{path}' not found."})
+    return await forward_to_frontend(request, path)

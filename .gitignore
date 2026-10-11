@@ -10,8 +10,11 @@ __pycache__/
 env/
 ENV/
 
-# Separate frontend repository (hosted at Vernit185/eleventh-seal-console)
-eleventh-seal-console/
+# Frontend dependencies & builds (source code in eleventh-seal-console is tracked)
+eleventh-seal-console/node_modules/
+eleventh-seal-console/.output/
+eleventh-seal-console/.tanstack/
+eleventh-seal-console/.wrangler/
 
 # OS / Editor
 .DS_Store
