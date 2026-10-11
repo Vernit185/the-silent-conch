@@ -78,6 +78,13 @@ class TicketRedeemRequest(BaseModel):
 FRONTEND_DEV_URL = "http://127.0.0.1:8080"
 
 async def forward_to_frontend(request: Request, path: str = ""):
+    # In production (e.g. Render) or when dev server is absent, serve the integrated Eleventh Seal Console template
+    if os.environ.get("RENDER") or os.environ.get("PRODUCTION") == "1":
+        template_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+        if os.path.exists(template_path):
+            with open(template_path, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+
     target = f"{FRONTEND_DEV_URL}/{path}".rstrip("/")
     if not path:
         target = f"{FRONTEND_DEV_URL}/"
@@ -94,7 +101,7 @@ async def forward_to_frontend(request: Request, path: str = ""):
                     url=target,
                     headers=headers,
                     content=content,
-                    timeout=5.0
+                    timeout=0.8
                 )
                 excluded = ["content-encoding", "content-length", "transfer-encoding", "connection"]
                 resp_headers = {k: v for k, v in resp.headers.items() if k.lower() not in excluded}
@@ -102,11 +109,10 @@ async def forward_to_frontend(request: Request, path: str = ""):
         except Exception:
             pass
 
-    for t_name in ["new_console.html", "index.html"]:
-        template_path = os.path.join(os.path.dirname(__file__), "templates", t_name)
-        if os.path.exists(template_path):
-            with open(template_path, "r", encoding="utf-8") as f:
-                return HTMLResponse(content=f.read())
+    template_path = os.path.join(os.path.dirname(__file__), "templates", "index.html")
+    if os.path.exists(template_path):
+        with open(template_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
     return HTMLResponse("<h1>Kurukshetra Relay Command - Seal XI</h1>")
 
 @app.get("/")
