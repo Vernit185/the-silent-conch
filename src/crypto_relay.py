@@ -182,7 +182,7 @@ def validate_oracle_jwt(token_str: str) -> Tuple[bool, str, Optional[Dict[str, A
             algorithms=[JWT_ALGORITHM],
             issuer=JWT_ISSUER,
             audience=JWT_AUDIENCE,
-            leeway=120
+            leeway=5
         )
 
         scopes = set(payload.get("scope", "").split())

@@ -4,13 +4,10 @@ import {
   Terminal, 
   Database, 
   Lock, 
-  Unlock, 
   Download, 
   Activity, 
   Cpu, 
   AlertTriangle, 
-  CheckCircle2, 
-  Copy, 
   RefreshCw,
   Eye,
   Send,
@@ -31,7 +28,7 @@ interface DiagnosticRecord {
 }
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'diagnostics' | 'oracle' | 'archive'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'diagnostics' | 'oracle'>('overview');
   const [records, setRecords] = useState<DiagnosticRecord[]>([]);
   const [loadingRecords, setLoadingRecords] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<DiagnosticRecord | null>(null);
@@ -48,11 +45,6 @@ export function App() {
   const [oracleResponses, setOracleResponses] = useState<Array<{ query: string; response: any; time: string }>>([]);
   const [oracleLoading, setOracleLoading] = useState(false);
 
-  // Archive state
-  const [ticketInput, setTicketInput] = useState('');
-  const [caseIdInput, setCaseIdInput] = useState('CASE-KURUKSHETRA-SEAL11');
-  const [redeemLoading, setRedeemLoading] = useState(false);
-  const [redeemResult, setRedeemResult] = useState<{ status: 'success' | 'error'; message: string; flag?: string } | null>(null);
 
   // Anti-Inspect security protections
   useEffect(() => {
@@ -221,44 +213,7 @@ export function App() {
     }
   };
 
-  const handleRedeemSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!ticketInput.trim() || !caseIdInput.trim()) {
-      setRedeemResult({ status: 'error', message: 'Ticket and Case ID are both required.' });
-      return;
-    }
 
-    setRedeemLoading(true);
-    setRedeemResult(null);
-    try {
-      const res = await fetch('/api/archive/redeem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ticket: ticketInput.trim(), case_id: caseIdInput.trim() })
-      });
-      const data = await res.json();
-      if (res.ok && data.status === 'success') {
-        setRedeemResult({
-          status: 'success',
-          message: data.message || 'Authorization ratified! Seal XI unsealed.',
-          flag: data.resolution?.flag || data.flag
-        });
-      } else {
-        setRedeemResult({
-          status: 'error',
-          message: data.message || 'Invalid or revoked archive ticket.'
-        });
-      }
-    } catch {
-      setRedeemResult({ status: 'error', message: 'Network error connecting to Archive redemption service.' });
-    } finally {
-      setRedeemLoading(false);
-    }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -326,18 +281,6 @@ export function App() {
           >
             <Cpu className="h-4 w-4" />
             <span>Oracle Console</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('archive')}
-            className={`flex items-center space-x-2 py-3 px-4 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-              activeTab === 'archive'
-                ? 'border-cyan-400 text-cyan-400 bg-cyan-950/20'
-                : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/30'
-            }`}
-          >
-            <Lock className="h-4 w-4" />
-            <span>Sealed Archive</span>
           </button>
         </div>
       </header>
@@ -757,105 +700,7 @@ export function App() {
           </div>
         )}
 
-        {/* ============================================================= */}
-        {/* VIEW 4: SEALED ARCHIVE REDEMPTION */}
-        {/* ============================================================= */}
-        {activeTab === 'archive' && (
-          <div className="max-w-2xl mx-auto space-y-6">
-            <div className="text-center space-y-2">
-              <div className="h-12 w-12 rounded-xl bg-purple-950/60 border border-purple-800/60 mx-auto flex items-center justify-center text-purple-400 shadow-lg shadow-purple-950/30">
-                <Lock className="h-6 w-6" />
-              </div>
-              <h2 className="text-2xl font-bold text-white tracking-wide">Sealed Archive Ratification</h2>
-              <p className="text-xs text-slate-400 font-mono">
-                Redeem your single-use delegation authorization ticket to ratify Case XI and claim the final resolution.
-              </p>
-            </div>
 
-            <form onSubmit={handleRedeemSubmit} className="p-6 rounded-xl bg-[#0f1422] border border-slate-800 space-y-4">
-              <div>
-                <label className="block text-xs font-mono text-slate-300 mb-1">ARCHIVE CASE IDENTIFIER</label>
-                <input
-                  type="text"
-                  value={caseIdInput}
-                  onChange={(e) => setCaseIdInput(e.target.value)}
-                  placeholder="CASE-KURUKSHETRA-SEAL11"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm font-mono text-white focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono text-slate-300 mb-1">SINGLE-USE DELEGATION TICKET</label>
-                <input
-                  type="text"
-                  value={ticketInput}
-                  onChange={(e) => setTicketInput(e.target.value)}
-                  placeholder="TICKET-KURUKSHETRA-..."
-                  className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm font-mono text-white focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={redeemLoading}
-                className="w-full py-2.5 px-4 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-semibold text-sm text-white transition flex items-center justify-center space-x-2 shadow-lg shadow-purple-950/40"
-              >
-                {redeemLoading ? (
-                  <RefreshCw className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Unlock className="h-4 w-4" />
-                )}
-                <span>Unseal Archive & Ratify Case</span>
-              </button>
-            </form>
-
-            {/* Redemption Output */}
-            {redeemResult && (
-              <div className={`p-6 rounded-xl border space-y-3 ${
-                redeemResult.status === 'success'
-                  ? 'bg-emerald-950/40 border-emerald-700/80'
-                  : 'bg-red-950/40 border-red-800'
-              }`}>
-                <div className="flex items-center space-x-2">
-                  {redeemResult.status === 'success' ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                  ) : (
-                    <AlertTriangle className="h-5 w-5 text-red-400" />
-                  )}
-                  <h3 className={`font-bold text-sm ${
-                    redeemResult.status === 'success' ? 'text-emerald-300' : 'text-red-300'
-                  }`}>
-                    {redeemResult.status === 'success' ? 'CASE RESOLUTION RATIFIED' : 'REDEMPTION REJECTED'}
-                  </h3>
-                </div>
-
-                <p className="text-xs text-slate-300 font-mono">
-                  {redeemResult.message}
-                </p>
-
-                {redeemResult.flag && (
-                  <div className="mt-4 p-4 rounded-lg bg-[#090b12] border border-emerald-500/50 space-y-2">
-                    <div className="text-[11px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
-                      ★ RATIFIED CASE FLAG:
-                    </div>
-                    <div className="flex items-center justify-between gap-2 p-2 rounded bg-black/60 border border-emerald-900">
-                      <code className="text-sm font-bold font-mono text-emerald-300 select-all">
-                        {redeemResult.flag}
-                      </code>
-                      <button
-                        onClick={() => copyToClipboard(redeemResult.flag!)}
-                        className="p-1.5 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-700 transition"
-                        title="Copy Flag"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
       </main>
 
       {/* Footer */}
