@@ -105,7 +105,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body onContextMenu={(e) => e.preventDefault()}>
         {children}
         <Scripts />
       </body>
@@ -115,6 +115,29 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && ["I", "i", "J", "j", "C", "c"].includes(e.key)) ||
+        (e.ctrlKey && ["U", "u", "S", "s"].includes(e.key))
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    };
+    window.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -144,7 +144,7 @@
     }
   </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
   <div class="application-shell">
     <!-- Header -->
     <header class="global-header">
@@ -616,6 +616,22 @@
   </div>
 
   <script>
+    // Security: Disable right-click inspect & developer tool shortcut keys
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    document.addEventListener('keydown', function(e) {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) ||
+        (e.ctrlKey && ['U', 'u', 'S', 's'].includes(e.key))
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     // State management
     let state = {
       token: localStorage.getItem('kra_jwt_token') || '',
